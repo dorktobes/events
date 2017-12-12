@@ -1,16 +1,22 @@
 
 
 const skip = (req, res, next) => {
-  console.log('logging skip');
-  next();
   //set end time of an ad
+  if (req.body.event_log.action.type ==='skip') {
+    //flag determineView
+    console.log('logging skip');
+    
+  }
 
+  next();
 };
 
 const pause = (req, res, next) => {
   //start a timeDelta on the document for 
   //req.body.docid + sessionid
-  console.log('logging pause');
+  if (req.body.event_log.action.type ==='pause') {
+    console.log('logging pause');
+  }
   next();
 
 };
@@ -18,7 +24,9 @@ const pause = (req, res, next) => {
 const resume = (req, res, next) => {
   //end a timeDelta on the document for 
   //req.body.docid + sessionid
-  console.log('logging resume');
+  if (req.body.event_log.action.type ==='resume') {
+    console.log('logging resume');
+  }
   next();
 
 };
@@ -27,8 +35,23 @@ const nav = (req, res, next) => {
   //end document for req.body.event_log.from
   //flag above document as ready-to-process
   //start document for req.body.event_log.to
-  console.log('logging navigation');
+  if (req.body.event_log.action.type ==='nav') {\
+    console.log('logging navigation');
+    //flag determineView
+  }
   next();
+};
+
+const determineView = (req, res, next) => {
+  //if document is flagged for dV,
+    //compare total viewtime with video length
+    //if doc is ad
+      //is view time over 30secs || is video watched to completion
+      //send for view increment
+    //else
+      //if viewtime is more than 12% of video length
+        //send for view increment
+
 };
 
 
@@ -37,4 +60,5 @@ module.exports = {
   pause,
   resume,
   nav,
+  determineView, 
 };

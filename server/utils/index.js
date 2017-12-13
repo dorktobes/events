@@ -2,11 +2,11 @@
 
 const skip = (req, res, next) => {
   //set end time of an ad
-  if (req.body.event_log.action.type ==='skip') {
+  // if (req.body.event_log.action.type ==='skip') {
     //flag determineView
     console.log('logging skip');
     
-  }
+  // }
 
   next();
 };
@@ -14,9 +14,9 @@ const skip = (req, res, next) => {
 const pause = (req, res, next) => {
   //start a timeDelta on the document for 
   //req.body.docid + sessionid
-  if (req.body.event_log.action.type ==='pause') {
+  // if (req.body.event_log.action.type ==='pause') {
     console.log('logging pause');
-  }
+  // }
   next();
 
 };
@@ -24,9 +24,9 @@ const pause = (req, res, next) => {
 const resume = (req, res, next) => {
   //end a timeDelta on the document for 
   //req.body.docid + sessionid
-  if (req.body.event_log.action.type ==='resume') {
+  // if (req.body.event_log.action.type ==='resume') {
     console.log('logging resume');
-  }
+  // }
   next();
 
 };
@@ -35,10 +35,10 @@ const nav = (req, res, next) => {
   //end document for req.body.event_log.from
   //flag above document as ready-to-process
   //start document for req.body.event_log.to
-  if (req.body.event_log.action.type ==='nav') {\
+  // if (req.body.event_log.action.type ==='nav') {
     console.log('logging navigation');
     //flag determineView
-  }
+  // }
   next();
 };
 

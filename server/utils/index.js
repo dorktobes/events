@@ -1,4 +1,4 @@
-
+const client = require('../../database/');
 
 const skip = (req, res, next) => {
   //set end time of an ad
@@ -43,6 +43,11 @@ const nav = (req, res, next) => {
 };
 
 const determineView = (req, res, next) => {
+  let query = 'select * from log';
+  client.execute(query, [], (err, data) => {
+    if (err) return console.log(err);
+    console.log(data);
+  })
   //if document is flagged for dV,
     //compare total viewtime with video length
     //if doc is ad

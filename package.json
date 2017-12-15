@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/dorktobes/hrsf83-thesis#readme",
   "dependencies": {
+    "cassandra-driver": "^3.3.0",
     "express": "^4.16.2",
     "nodemon": "^1.12.5"
   }

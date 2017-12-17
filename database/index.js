@@ -7,17 +7,3 @@ client.connect((err)=> {
 });
 
 module.exports = client;
-
-// let initTable = `CREATE TABLE log ( log_id text PRIMARY KEY, session_id text, v_id int, is_ad boolean, start_time int, break_start int, pause_delta int, ready_to_process boolean, log_end int, log_start int, );`
-// const query = 'SELECT * FROM log';
-// client.execute(query, [], { prepare: true }, function (err, result) {
-//   if (err) return console.log(err);
-//   console.log(result);
-// });
-// client.execute(query, (err, res) => {
-// 	if (err) {
-// 		console.log(err)
-// 	} else {
-// 		console.log(res)
-// 	}
-// })

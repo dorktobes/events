@@ -1,4 +1,5 @@
 const client = require('../../database/');
+const crypto = require('crypto');
 
 const skip = (req, res, next) => {
   //set end time of an ad
@@ -15,7 +16,10 @@ const pause = (req, res, next) => {
   //start a timeDelta on the document for 
   //req.body.docid + sessionid
   // if (req.body.event_log.action.type ==='pause') {
-    console.log('logging pause');
+    if (req.body.type === 'pause') {
+      console.log('logging pause');
+      console.log(req.log);
+    }
   // }
   next();
 
@@ -31,23 +35,74 @@ const resume = (req, res, next) => {
 
 };
 
+/******************Note about  /nav*************
+* this is the first middleware usedfor the /log_event endpoint. 
+* if the event is a navigation event:
+* it closes the first log and flags it for processing
+* then it creates a new event to be saved for the next video
+*
+* for any other endpoint, it still does the work of retrieving the event from the db and attaching it to the body
+* the actual event will do the saving
+*/
 const nav = (req, res, next) => {
+  if (req.body.type === 'nav') {
+    console.log('logging navigation');
+    if (req.body.from) {
+      client.execute('SELECT * FROM log WHERE log_id = ? ;', [createHash(req.body.from.id + req.cookies.youtube_session)], {prepare: true})
+      .then((data) => {
+        console.log(data);
+        req.workToDo = data.rows[0];
+        req.workToDo.ready_to_process = true;
+        let params = [createHash(req.body.to.id + req.cookies.youtube_session), req.body.targetVid.id, req.body.targetVid.isAd, req.body.dispatchTime, false];
+        client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process) VALUES ( ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data) => {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log(data)
+          }
+            next();
+        })
+      })
+      
+    } else {
+      let params = [createHash(req.body.targetVid.id + req.cookies.youtube_session), req.body.targetVid.id, req.body.targetVid.isAd, req.body.dispatchTime, false];
+      client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process) VALUES ( ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data) => {
+        if (err) {
+          console.log(err)
+        } else {
+          console.log(data)
+        }
+        next();
+      })
+    }
+    
+  } else {
+    client.execute('SELECT * FROM log WHERE log_id = ? ;', [createHash(req.body.targetVid.id + req.cookies.youtube_session)], {prepare: true}, (err, data) => {
+  if (err) {
+    console.log(err);
+  } else {
+    req.log = data.rows[0];
+  }
+  next();
+})
+
+
+
+  }
   //end document for req.body.event_log.from
   //flag above document as ready-to-process
   //start document for req.body.event_log.to
   // if (req.body.event_log.action.type ==='nav') {
-    console.log('logging navigation');
     //flag determineView
   // }
-  next();
 };
 
 const determineView = (req, res, next) => {
-  let query = 'select * from log';
-  client.execute(query, [], (err, data) => {
-    if (err) return console.log(err);
-    console.log(data);
-  })
+  if (req.workToDo) {
+    console.log('determining view');
+    console.log(req.workToDo)
+  }
+  next()
   //if document is flagged for dV,
     //compare total viewtime with video length
     //if doc is ad
@@ -59,11 +114,46 @@ const determineView = (req, res, next) => {
 
 };
 
+const retrieveLog = (req, res, next) => {
+
+};
+
+const test = (req, res, next) => {
+  let today = new Date()
+  req.cookies = {
+    youtube_session: '14aefda9799b3919125b3ed4d1f3f0942d4ae7273ff0d7e25f55c8c28a6ed056'//createHash( Math.floor(Math.random() * 10 + 1) + "" + today.getDate() + today.getHours())
+  } 
+  console.log(req.cookies.youtube_session)
+
+  req.body = {
+    targetVid: {
+      v_id: '4561019',
+      isAd: false,
+      len: '21057',
+    },
+    type: 'pause',
+    from: null,
+    dispatchTime: Date.now(),
+  }
+
+
+
+  //sampe non-ad { id: '4561019', isAd: false, len: '21057'}
+  //sample ad { id: '6777789', isAd: true, len: '3000'}
+  next();
+};
+
+const createHash = (key) => {
+  const hash = crypto.createHash('sha256');
+  hash.update(key);
+  return hash.digest('hex');
+}
 
 module.exports = {
   skip,
   pause,
   resume,
   nav,
-  determineView, 
+  determineView,
+  test, 
 };

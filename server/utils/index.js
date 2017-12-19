@@ -4,7 +4,7 @@ const crypto = require('crypto');
 //I'm not positive if this endpoint is necessary. I'll talk to Andrew tomorrow
 const skip = (req, res, next) => {
   if (req.body.type === 'skip') {
-    console.log('logging skip');
+    // console.log('logging skip');
   } else {
     next();
   }
@@ -12,10 +12,10 @@ const skip = (req, res, next) => {
 
 const pause = (req, res, next) => {
   if (req.body.type === 'pause') {
-    console.log(req.log);
+    // console.log(req.log);
     client.execute('UPDATE log SET break_start = ? WHERE log_id = ?;', [req.body.dispatchTime, req.log.log_id], {prepare: true})
     .then((data) => {
-      console.log('logging pause', data);
+      // console.log('logging pause', data);
       next();
     })
   } else {
@@ -25,12 +25,12 @@ const pause = (req, res, next) => {
 
 const resume = (req, res, next) => {
   if (req.body.type === 'resume') {
-    console.log('logging resume');
+    // console.log('logging resume');
     let delta = req.body.dispatchTime - req.log.break_start;
     client.execute('UPDATE log SET pause_delta = ? WHERE log_id = ?;', [delta, req.log.log_id], {prepare: true})
     .then((data) => {
-      console.log(delta);
-      console.log('logging pause', data);
+      // console.log(delta);
+      // console.log('logging pause', data);
       next();
     })
     next();
@@ -54,7 +54,7 @@ const nav = (req, res, next) => {
     if (req.body.from) {
       client.execute('SELECT * FROM log WHERE log_id = ? ;', [createHash(req.body.from.id + req.cookies.youtube_session)], {prepare: true})
       .then((data) => {
-        console.log(data);
+        // console.log(data);
         req.workToDo = data.rows[0];
         req.workToDo.ready_to_process = true;
         let params = [createHash(req.body.to.id + req.cookies.youtube_session), req.body.targetVid.id, req.body.targetVid.isAd, req.body.dispatchTime, false, 0];
@@ -62,7 +62,7 @@ const nav = (req, res, next) => {
           if (err) {
             console.log(err)
           } else {
-            console.log(data)
+            // console.log(data)
           }
             next();
         })
@@ -74,7 +74,7 @@ const nav = (req, res, next) => {
         if (err) {
           console.log(err)
         } else {
-          console.log(data)
+          // console.log(data)
         }
         next();
       })
@@ -104,7 +104,6 @@ const nav = (req, res, next) => {
 
 const determineView = (req, res, next) => {
   if (req.workToDo) {
-    console.log('determining view');
     let view, totalWatchTime = req.body.dispatchTime - req.workToDo.start_time - req.workToDo.pause_delta;
     if (req.workToDo.is_ad) {
       view = totalWatchTime >= 30000 || totalWatchTime === req.workToDo.v_len;
@@ -113,7 +112,6 @@ const determineView = (req, res, next) => {
         return 1;
       }
     } else {
-      console.log(totalWatchTime, '|', req.workToDo.v_len * 0.10)
       view = totalWatchTime >= req.workToDo.v_len * 0.10
       if (view) {
         //send PATCH request to videos to increment views
@@ -143,7 +141,6 @@ const test = (req, res, next) => {
   req.cookies = {
     youtube_session: '14aefda9799b3919125b3ed4d1f3f0942d4ae7273ff0d7e25f55c8c28a6ed056'//createHash( Math.floor(Math.random() * 10 + 1) + "" + today.getDate() + today.getHours())
   } 
-  console.log(req.cookies.youtube_session)
 
   req.body = {
     targetVid: {

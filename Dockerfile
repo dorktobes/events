@@ -1,5 +1,6 @@
 FROM node:latest
 RUN mkdir -p /src/app
+ADD . /src/app
 WORKDIR /src/app
 COPY . /src/app
 #RUN npm i -g npm

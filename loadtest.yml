@@ -6,10 +6,10 @@ config:
     - duration: 120
       arrivalRate: 5
       rampTo: 50
-    - duration: 600
-      arrivalRate: 50
+    - duration: 120
+      arrivalRate: 300
 scenarios:
-  - name: "this is a slash route test"
+  - name: "testing pausing the same video"
     flow:
       - get:
-          url: "/"
+          url: "/log_event"

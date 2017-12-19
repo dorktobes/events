@@ -1,6 +1,7 @@
 const client = require('../../database/');
 const crypto = require('crypto');
 
+//I'm not positive if this endpoint is necessary. I'll talk to Andrew tomorrow
 const skip = (req, res, next) => {
   if (req.body.type === 'skip') {
     console.log('logging skip');
@@ -104,14 +105,20 @@ const nav = (req, res, next) => {
 const determineView = (req, res, next) => {
   if (req.workToDo) {
     console.log('determining view');
-    let view, totalWatchTime = req.body.dispatchTime - req.workToDo - req.workToDo.pause_delta;
+    let view, totalWatchTime = req.body.dispatchTime - req.workToDo.start_time - req.workToDo.pause_delta;
     if (req.workToDo.is_ad) {
       view = totalWatchTime >= 30000 || totalWatchTime === req.workToDo.v_len;
       if (view) {
         //send PATCH request to videos to increment views
+        return 1;
       }
     } else {
-      view = totalWatchTime > req.workToDo.v_len * 0.10
+      console.log(totalWatchTime, '|', req.workToDo.v_len * 0.10)
+      view = totalWatchTime >= req.workToDo.v_len * 0.10
+      if (view) {
+        //send PATCH request to videos to increment views
+        return 1;
+      }
     }
   } else {
     next()
@@ -124,7 +131,7 @@ const determineView = (req, res, next) => {
     //else
       //if viewtime is more than 12% of video length
         //send for view increment
-
+  return 0;
 };
 
 const retrieveLog = (req, res, next) => {

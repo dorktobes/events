@@ -1,5 +1,5 @@
 config:
-  target: "127.0.0.1:1982"
+  target: "http://127.0.0.1:1982"
   phases:
     - duration: 60
       arrivalRate: 5
@@ -12,4 +12,4 @@ scenarios:
   - name: "this is a slash route test"
     flow:
       - get:
-        url: "/"
+          url: "/"

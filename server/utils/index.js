@@ -73,9 +73,7 @@ const nav = (req, res, next) => {
       client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process) VALUES ( ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data) => {
         if (err) {
           console.log(err)
-        } else {
-          // console.log(data)
-        }
+        } 
         next();
       })
     }
@@ -130,10 +128,6 @@ const determineView = (req, res, next) => {
       //if viewtime is more than 12% of video length
         //send for view increment
   return 0;
-};
-
-const retrieveLog = (req, res, next) => {
-
 };
 
 const test = (req, res, next) => {

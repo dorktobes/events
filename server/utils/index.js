@@ -2,47 +2,7 @@ const client = require('../../database/');
 const { startRecord, retrieveRecord } = require('../../database/controllers');
 const crypto = require('crypto');
 
-/******************Note about nav*************
-* this is the first middleware usedfor the /log_event endpoint. 
-* if the event is a navigation event:
-* it closes the first log and flags it for processing
-* then it creates a new event to be saved for the next video
-*
-* for any other endpoint, it still does the work of retrieving the event from the db and attaching it to the body
-* the actual event will do the saving
-*/
-const nav = (req, res, next) => {
-  if (req.body.type === 'nav') {
-    console.log('logging navigation');
-    if (req.body.from) {
-      client.execute('SELECT * FROM log WHERE log_id = ? ;', [createHash(req.body.from.id + req.cookies.youtube_session)], {prepare: true})
-      .then((data) => {
-        // console.log(data);
-        req.workToDo = data.rows[0];
-        req.workToDo.ready_to_process = true;
-        let params = [createHash(req.body.to.id + req.cookies.youtube_session), req.body.targetVid.id, req.body.targetVid.isAd, req.body.dispatchTime, false, 0];
-        client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process, pause_delta) VALUES ( ?, ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data) => {
-          if (err) {
-            console.log(err)
-          } else {
-            // console.log(data)
-          }
-            next();
-        })
-      })
-      
-    } else {
-      let params = [createHash(req.body.targetVid.id + req.cookies.youtube_session), req.body.targetVid.id, req.body.targetVid.isAd, req.body.dispatchTime, false];
-      client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process) VALUES ( ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data) => {
-        if (err) {
-          console.log(err)
-        } 
-        next();
-      })
-    }
-    
-  }
-};
+
 const determineView = (log) => {
     let view, totalWatchTime = log.log_end - log.start_time - log.pause_delta;
     if (log.is_ad) {
@@ -85,7 +45,7 @@ const handleNav = (req, res, next) => {
     )
   }
 };
-
+//this is for dev purposes only
 const test = (req, res, next) => {
   let today = new Date()
   req.cookies = {

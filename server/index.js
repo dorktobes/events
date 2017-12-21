@@ -5,15 +5,10 @@ const bodyParser = require('body-parser');
 
 
 let app = express();
-// parse application/x-www-form-urlencoded 
+
 app.use(bodyParser.urlencoded({ extended: false }))
- 
-// parse application/json 
 app.use(bodyParser.json())
 
-// app.get('/', (req, res) => {
-// 	res.send('this isn\'t an endpoint');
-// })
 app.use('/video/:vid/event/nav', test, handleNav, (req, res) => {
   res.send(req.log);
 })

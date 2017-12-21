@@ -1,9 +1,10 @@
 const client = require('../');
-const { createHash } = require('../../server/utils/');
+const { createHash } = require('../../server/utils');
 
 const updateBreakStart = (req, res, next) => {
   client.execute('UPDATE log SET break_start = ? WHERE log_id = ?;', [req.body.dispatchTime, createHash(req.body.targetVid.v_id + req.cookies.youtube_session)], {prepare: true})
   .then((data) => {
+    console.log(data);
     next();
   }, (err) => {
     res.send(err);
@@ -32,8 +33,9 @@ const updatePauseDelta = (req, res, next) => {
       },
       (err) => {
         console.log(err)
-      };
+      }
     )
+  });
 };
 
 /*------------------------------------Promise-based Helpers------------------------------------*/
@@ -83,6 +85,7 @@ const retrieveRecord = (vidMeta, session, timestamp) => {
 module.exports = {
   updateBreakStart, 
   updatePauseDelta,
+  updateLogEnd,
   startRecord,
   retrieveRecord,
 };

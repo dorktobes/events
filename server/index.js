@@ -1,8 +1,7 @@
 const express = require('express');
-const { handleNav, test, } = require('./utils/');
+const { handleNav, test, } = require('./utils/middleware/');
 const { updateBreakStart, updatePauseDelta } = require('../database/controllers');
 const bodyParser = require('body-parser');
-
 
 let app = express();
 
@@ -21,3 +20,8 @@ app.use('/video/:vid/event/resume', test, updatePauseDelta, (req, res) => {
 
 
 app.listen(1982, console.log('listening...'));
+
+const test2 = () => {
+  console.log('test');
+}
+module.exports = {test2}

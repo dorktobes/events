@@ -1,43 +1,6 @@
 const client = require('../../database/');
+const { startRecord } = require('../../database/controllers');
 const crypto = require('crypto');
-
-//I'm not positive if this endpoint is necessary. I'll talk to Andrew tomorrow
-const skip = (req, res, next) => {
-  if (req.body.type === 'skip') {
-    // console.log('logging skip');
-  } else {
-    next();
-  }
-};
-
-const pause = (req, res, next) => {
-  if (req.body.type === 'pause') {
-    // console.log(req.log);
-    client.execute('UPDATE log SET break_start = ? WHERE log_id = ?;', [req.body.dispatchTime, req.log.log_id], {prepare: true})
-    .then((data) => {
-      // console.log('logging pause', data);
-      next();
-    })
-  } else {
-    next();
-  }
-};
-
-const resume = (req, res, next) => {
-  if (req.body.type === 'resume') {
-    // console.log('logging resume');
-    let delta = req.body.dispatchTime - req.log.break_start;
-    client.execute('UPDATE log SET pause_delta = ? WHERE log_id = ?;', [delta, req.log.log_id], {prepare: true})
-    .then((data) => {
-      // console.log(delta);
-      // console.log('logging pause', data);
-      next();
-    })
-    next();
-  } else {
-    next();
-  }
-};
 
 /******************Note about nav*************
 * this is the first middleware usedfor the /log_event endpoint. 
@@ -80,30 +43,10 @@ const nav = (req, res, next) => {
       })
     }
     
-  } else {
-    client.execute('SELECT * FROM log WHERE log_id = ? ;', [createHash(req.body.targetVid.id + req.cookies.youtube_session)], {prepare: true}, (err, data) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(data);
-    req.log = data.rows[0];
   }
-  next();
-})
-
-
-
-  }
-  //end document for req.body.event_log.from
-  //flag above document as ready-to-process
-  //start document for req.body.event_log.to
-  // if (req.body.event_log.action.type ==='nav') {
-    //flag determineView
-  // }
 };
-
-const determineView = (req, res, next) => {
-  if (req.workToDo) {
+//================> make this a cb and not middleware
+const determineView = (log) => {
     let view, totalWatchTime = req.body.dispatchTime - req.workToDo.start_time - req.workToDo.pause_delta;
     if (req.workToDo.is_ad) {
       view = totalWatchTime >= 30000 || totalWatchTime === req.workToDo.v_len;
@@ -118,22 +61,23 @@ const determineView = (req, res, next) => {
         return 1;
       }
     }
-  } else {
-    next()
-  }
-  //if document is flagged for dV,
-    //compare total viewtime with video length
-    //if doc is ad
-      //is view time over 30secs || is video watched to completion
-      //send for view increment
-    //else
-      //if viewtime is more than 12% of video length
-        //send for view increment
   return 0;
 };
-
-const retrieveLog = (req, res, next) => {
-
+/////////////rename this
+const handleNav = (req, res, next) => {
+  let session = req.cookies.youtube_session;
+  startRecord(req.body.targetVid, session, req.dispatchTime)
+  .then(
+    (data) => {
+      next();
+    },
+    (err) => {
+      res.status(500).send('something broke')
+    }
+  )
+  if (req.body.from) {
+    determineView(retrieveRecord(req.from, session, req.dispatchTime));
+  }
 };
 
 const test = (req, res, next) => {
@@ -167,9 +111,7 @@ const createHash = (key) => {
 }
 
 module.exports = {
-  skip,
-  pause,
-  resume,
+  createHash,
   nav,
   determineView,
   test, 

@@ -37,12 +37,12 @@ const handleNav = (req, res, next) => {
     .then(
       (data) => {
         data.log_end = req.dispatchTime;
-        determineView(data)
+        determineView(data);
       },
       (err) => {
-        console.error(err)
+        console.error(err);
       }
-    )
+    );
   }
 };
 //this is for dev purposes only

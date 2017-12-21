@@ -1,5 +1,5 @@
 const client = require('../../database/');
-const { startRecord } = require('../../database/controllers');
+const { startRecord, retrieveRecord } = require('../../database/controllers');
 const crypto = require('crypto');
 
 /******************Note about nav*************
@@ -43,17 +43,16 @@ const nav = (req, res, next) => {
     
   }
 };
-//================> make this a cb and not middleware
 const determineView = (log) => {
-    let view, totalWatchTime = req.body.dispatchTime - req.workToDo.start_time - req.workToDo.pause_delta;
-    if (req.workToDo.is_ad) {
-      view = totalWatchTime >= 30000 || totalWatchTime === req.workToDo.v_len;
+    let view, totalWatchTime = log.log_end - log.start_time - log.pause_delta;
+    if (log.is_ad) {
+      view = totalWatchTime >= 30000 || totalWatchTime === log.v_len;
       if (view) {
         //send PATCH request to videos to increment views
         return 1;
       }
     } else {
-      view = totalWatchTime >= req.workToDo.v_len * 0.10
+      view = totalWatchTime >= log.v_len * 0.10
       if (view) {
         //send PATCH request to videos to increment views
         return 1;
@@ -77,6 +76,7 @@ const handleNav = (req, res, next) => {
     retrieveRecord(req.from, session, req.dispatchTime)
     .then(
       (data) => {
+        data.log_end = req.dispatchTime;
         determineView(data)
       },
       (err) => {
@@ -118,7 +118,7 @@ const createHash = (key) => {
 
 module.exports = {
   createHash,
-  nav,
+  handleNav,
   determineView,
   test, 
 };

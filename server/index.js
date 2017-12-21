@@ -1,5 +1,5 @@
 const express = require('express');
-const { nav, determineView, test, } = require('./utils/');
+const { handleNav, determineView, test, } = require('./utils/');
 const { updateBreakStart, updatePauseDelta } = require('../database/controllers');
 const bodyParser = require('body-parser');
 
@@ -14,7 +14,7 @@ app.use(bodyParser.json())
 // app.get('/', (req, res) => {
 // 	res.send('this isn\'t an endpoint');
 // })
-app.use('/video/:vid/event/nav', test, nav, determineView, (req, res) => {
+app.use('/video/:vid/event/nav', test, handleNav, (req, res) => {
   res.send(req.log);
 })
 app.use('/video/:vid/event/pause', test, updateBreakStart, (req, res) => {

@@ -68,4 +68,5 @@ module.exports = {
   updateBreakStart, 
   updatePauseDelta,
   startRecord,
+  retrieveRecord,
 }

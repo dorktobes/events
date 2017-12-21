@@ -10,6 +10,7 @@ const updateBreakStart = (req, res, next) => {
   })
 };
 
+/*------------------------------------Middlewares------------------------------------*/
 const updatePauseDelta = (req, res, next) => {
   console.log(req);
   let log_id = createHash(req.body.targetVid.v_id + req.cookies.youtube_session)
@@ -33,6 +34,18 @@ const updatePauseDelta = (req, res, next) => {
         console.log(err)
       };
     )
+};
+
+/*------------------------------------Promise-based Helpers------------------------------------*/
+const updateLogEnd = (vidMeta, session, timestamp) => {
+  return new Promise((resolve, reject) => {
+    client.execute('UPDATE log SET log_end = ? WHERE log_id = ?;', [timestamp, createHash(vidMeta.v_id + session)], {prepare: true})
+    .then((data) => {
+      resolve(data);
+    }, (err) => {
+      reject(err);
+    });
+  });
 };
 
 const startRecord = (vidMeta, session, timestamp) => {

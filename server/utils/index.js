@@ -47,7 +47,7 @@ const handleNav = (req, res, next) => {
 };
 //this is for dev purposes only
 const test = (req, res, next) => {
-  let today = new Date()
+  let today = new Date();
   req.cookies = {
     youtube_session: '14aefda9799b3919125b3ed4d1f3f0942d4ae7273ff0d7e25f55c8c28a6ed056'//createHash( Math.floor(Math.random() * 10 + 1) + "" + today.getDate() + today.getHours())
   } 

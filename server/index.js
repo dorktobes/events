@@ -1,5 +1,5 @@
 const express = require('express');
-const { handleNav, determineView, test, } = require('./utils/');
+const { handleNav, test, } = require('./utils/');
 const { updateBreakStart, updatePauseDelta } = require('../database/controllers');
 const bodyParser = require('body-parser');
 

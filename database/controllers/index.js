@@ -32,10 +32,35 @@ const updatePauseDelta = (req, res, next) => {
 };
 
 const startRecord = (vidMeta, session, timestamp) => {
-
+  return new Promise((resolve, reject) => {
+    let params = [createHash(vidMeta.id + session), vidMeta.id, vidMeta.isAd, timestamp, false];
+    client.execute('INSERT INTO log (log_id, v_id, is_ad, start_time, ready_to_process) VALUES ( ?, ?, ?, ?, ?)', params, {prepare: true}, (err, data)  => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(data)
+      }
+    })
+  })
 };
 
 const retrieveRecord = (vidMeta, session, timestamp) => {
+  return new Promise((resolve, reject) => {
+    client.execute(`
+      SELECT * 
+      FROM log 
+      WHERE log_id = ? ;`, 
+      [createHash(vidMeta.id + session)], 
+      {prepare: true}, 
+      (err, data)  => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.rows[0])
+        }
+      }
+    )
+  })
 
 };
 

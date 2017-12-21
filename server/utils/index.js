@@ -74,7 +74,15 @@ const handleNav = (req, res, next) => {
     }
   )
   if (req.body.from) {
-    determineView(retrieveRecord(req.from, session, req.dispatchTime));
+    retrieveRecord(req.from, session, req.dispatchTime)
+    .then(
+      (data) => {
+        determineView(data)
+      },
+      (err) => {
+        console.error(err)
+      }
+    )
   }
 };
 

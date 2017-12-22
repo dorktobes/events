@@ -1,44 +1,42 @@
 const client = require('../');
 const { createHash } = require('../../server/utils');
 
-
-
-/*------------------------------------Middlewares------------------------------------*/
-const updateBreakStart = (req, res, next) => {
-  client.execute('UPDATE log SET break_start = ? WHERE log_id = ?;', [req.body.dispatchTime, createHash(req.body.targetVid.v_id + req.cookies.youtube_session)], {prepare: true})
-  .then((data) => {
-    console.log(data);
-    next();
-  }, (err) => {
-    res.send(err);
+const updateBreakStart = (vidMeta, session, timestamp) => {
+  return new Promise((resolve, reject) => {
+    client.execute('UPDATE log SET break_start = ? WHERE log_id = ?;', [timestamp, createHash(vidMeta.v_id + session)], {prepare: true})
+    .then((data) => {
+      resolve(data);
+    }, (err) => {
+      reject(err);
+    })
   })
 };
 
-const updatePauseDelta = (req, res, next) => {
-  let log_id = createHash(req.body.targetVid.v_id + req.cookies.youtube_session)
-  client.execute(`
-    SELECT break_start 
-    FROM log 
-    WHERE log_id = ?;`,[log_id], {prepare: true})
-  .then((data) => {
-    let break_start = data.rows[0].break_start;
+const updatePauseDelta = (vidMeta, session, timestamp) => {
+  return new Promise((resolve, reject) => {
+    let log_id = createHash(vidMeta.v_id + session)
     client.execute(`
-      UPDATE log 
-      SET pause_delta = ?
-      WHERE log_id = ?;`, [req.body.dispatchTime - break_start, log_id], {prepare: true})
-    .then(
-      (data) => {
-        console.log(data);
-        next();
-      },
-      (err) => {
-        console.log(err)
-      }
-    )
-  });
+      SELECT break_start 
+      FROM log 
+      WHERE log_id = ?;`,[log_id], {prepare: true})
+    .then((data) => {
+      let break_start = data.rows[0].break_start;
+      client.execute(`
+        UPDATE log 
+        SET pause_delta = ?
+        WHERE log_id = ?;`, [timestamp - break_start, log_id], {prepare: true})
+      .then(
+        (data) => {
+          resolve(data);
+        },
+        (err) => {
+          reject(err)
+        }
+      )
+    });
+  })
 };
 
-/*------------------------------------Promise-based Helpers------------------------------------*/
 const updateLogEnd = (vidMeta, session, timestamp) => {
   return new Promise((resolve, reject) => {
     client.execute('UPDATE log SET log_end = ? WHERE log_id = ?;', [timestamp, createHash(vidMeta.v_id + session)], {prepare: true})

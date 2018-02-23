@@ -19,5 +19,5 @@ app.use('/video/:vid/event/resume', handleResume, (req, res) => {
   res.send();
 })
 
-
+//foo bar
 app.listen(1982, console.log('listening...'));
